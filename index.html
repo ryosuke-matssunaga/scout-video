@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<title>スカウト動画庫</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --ink:#15181d; --sub:#5d6573; --line:#e1e4ea;
+  --accent:#0b5cad; --accent-ink:#ffffff; --warn:#b4560a; --danger:#b42318;
+  --rA:#b42318; --rB:#c2620a; --rC:#0b5cad; --rD:#6b7280;
+  --chip:#eef1f5; --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1115; --panel:#181b21; --ink:#e8eaee; --sub:#9aa3b2; --line:#2a2f38;
+    --accent:#4c9be8; --accent-ink:#0b0d10; --warn:#f0a35c; --danger:#f2766b;
+    --rA:#f2766b; --rB:#f0a35c; --rC:#6fb1f0; --rD:#9aa3b2;
+    --chip:#22262e; --shadow:none;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+  font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* lock */
+#lock{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.lockbox{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 22px;box-shadow:var(--shadow)}
+.brand{font-weight:800;letter-spacing:.08em;font-size:12px;color:var(--accent)}
+.lockbox h1{margin:4px 0 4px;font-size:22px}
+.lockbox p{margin:0 0 18px;color:var(--sub);font-size:13px}
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
+input[type=text],input[type=password],input[type=date],input[type=url],select,textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--panel);font-weight:600;font-size:14px;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn.block{width:100%;padding:12px}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:var(--danger);font-size:13px;min-height:20px;margin-top:8px}
+.linkbtn{background:none;border:0;color:var(--sub);font-size:12px;text-decoration:underline;padding:0;margin-top:14px}
+
+/* app */
+header.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+.topin{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.topin h1{font-size:17px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topin h1 small{display:block;font-size:10px;letter-spacing:.1em;color:var(--accent);font-weight:800}
+.toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--sub);user-select:none}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 120px}
+.filters{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}
+.filters .row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (min-width:700px){.filters .row{grid-template-columns:repeat(4,1fr)}}
+.meta-line{display:flex;justify-content:space-between;align-items:center;color:var(--sub);font-size:13px;margin:4px 2px 10px;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;box-shadow:var(--shadow);display:flex;gap:12px;align-items:flex-start;width:100%}
+.card:hover{border-color:var(--accent)}
+.card .body{flex:1;min-width:0}
+.card .name{font-weight:700;font-size:16px}
+.card .sub{color:var(--sub);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .foot{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.rank{flex:none;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;border:2px solid currentColor}
+.rank.A{color:var(--rA)}.rank.B{color:var(--rB)}.rank.C{color:var(--rC)}.rank.D,.rank.none{color:var(--rD)}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 9px;font-size:12px;color:var(--sub)}
+.empty{text-align:center;color:var(--sub);padding:50px 10px;border:1px dashed var(--line);border-radius:12px}
+
+/* detail */
+#detail{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto}
+.dhead{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);z-index:2}
+.dhead .topin h1{font-size:18px}
+.dwrap{max-width:1100px;margin:0 auto;padding:14px 16px 120px;display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:900px){.dwrap{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}}
+.player-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+.player-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player-frame .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa3b2;font-size:14px;text-align:center;padding:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font-size:14px;margin:0 0 10px;color:var(--sub);font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.now{margin:10px 2px 0}
+.now .t{font-weight:700}
+.now .s{color:var(--sub);font-size:13px}
+.scenes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.scene{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13px}
+.scene b{color:var(--accent);margin-right:5px;font-variant-numeric:tabular-nums}
+.vlist{display:flex;flex-direction:column;gap:6px}
+.vitem{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--panel);text-align:left;width:100%}
+.vitem.on{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.vitem img{width:96px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#000;flex:none}
+.vitem .vt{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.vitem .vs{font-size:12px;color:var(--sub)}
+.vitem .grow{flex:1;min-width:0}
+dl.info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+dl.info dt{color:var(--sub)}
+dl.info dd{margin:0}
+.memo{white-space:pre-wrap;font-size:14px}
+.edit-only{display:none}
+body.editing .edit-only{display:revert}
+body.editing .btnrow.edit-only{display:flex}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* save bar */
+#savebar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--warn);color:#fff;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+#savebar .in{max-width:1100px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#savebar .btn{background:#fff;color:#111;border-color:#fff}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:640px){.modal{align-items:center}}
+.sheet{background:var(--panel);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+@media (min-width:640px){.sheet{border-radius:16px}}
+.sheet h3{margin:0 0 14px;font-size:17px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--sub);margin-top:4px}
+/* 評価・計測 */
+.grades{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:14px}
+.gbar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.gbar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.gnum{font-weight:700;font-variant-numeric:tabular-nums;min-width:1.5em;text-align:right}
+.meas{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:12px}
+.meas div{background:var(--chip);border-radius:9px;padding:8px 10px}
+.meas small{display:block;color:var(--sub);font-size:11px}
+.meas b{font-size:18px;font-variant-numeric:tabular-nums}
+.st{font-weight:700}
+.st-最優先{color:var(--rA)}.st-獲得候補{color:var(--rB)}.st-要再視察{color:var(--rC)}.st-見送り{color:var(--rD)}
+.gsel{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.gsel label{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--chip);border-radius:9px;padding:6px 10px;font-size:13px}
+.gsel select{width:auto;padding:4px 8px}
+fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px 4px;margin:0 0 12px}
+legend{font-size:12px;color:var(--sub);padding:0 4px}
+/* 比較 */
+body.comparing .card{border-style:dashed}
+.card.sel{border:2px solid var(--accent)!important;background:color-mix(in srgb,var(--accent) 7%,var(--panel))}
+.cmpwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.cmp{border-collapse:collapse;font-size:13px;min-width:100%}
+table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;white-space:nowrap}
+table.cmp th{color:var(--sub);font-weight:600;position:sticky;left:0;background:var(--panel)}
+table.cmp td.best{font-weight:800;color:var(--accent)}
+table.cmp img{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block}
+.sheet.wide{max-width:920px}
+.guide h4{margin:16px 0 6px;font-size:14px}
+.guide ol,.guide ul{margin:0;padding-left:1.3em;font-size:14px}
+.guide li{margin:3px 0}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;z-index:100}
+</style>
+</head>
+<body>
+
+<!-- ===== ロック画面 ===== -->
+<section id="lock">
+  <div class="lockbox">
+    <div class="brand">AGK SCOUT</div>
+    <h1>スカウト動画庫</h1>
+    <p id="lockMsg">スタッフ専用です。パスワードを入力してください。</p>
+
+    <form id="unlockForm" autocomplete="off">
+      <label class="field"><span>パスワード</span>
+        <input type="password" id="pw" autocomplete="current-password" required></label>
+      <button class="btn primary block" id="unlockBtn">開く</button>
+      <div class="err" id="unlockErr"></div>
+    </form>
+
+    <form id="setupForm" class="hidden" autocomplete="off">
+      <label class="field"><span>新しいパスワード（10文字以上推奨）</span>
+        <input type="password" id="newpw1" autocomplete="new-password" required minlength="6"></label>
+      <label class="field"><span>もう一度</span>
+        <input type="password" id="newpw2" autocomplete="new-password" required></label>
+      <button class="btn primary block">はじめる</button>
+      <div class="err" id="setupErr"></div>
+    </form>
+
+    <button class="linkbtn" id="loadFileBtn" type="button">データファイルを手動で読み込む</button>
+    <input type="file" id="fileIn" accept=".json,application/json" class="hidden">
+  </div>
+</section>
+
+<!-- ===== 一覧 ===== -->
+<section id="app" class="hidden">
+  <header class="top"><div class="topin">
+    <h1><small>AGK SCOUT</small>スカウト動画庫</h1>
+    <button class="btn ghost" id="guideBtn">使い方</button>
+    <label class="toggle"><input type="checkbox" id="editToggle">編集</label>
+    <button class="btn ghost" id="lockBtn" title="ロック">ロック</button>
+  </div></header>
+  <main>
+    <div class="filters">
+      <input type="text" id="q" placeholder="選手名・所属・メモ・大会名で検索">
+      <div class="row">
+        <select id="fPos"><option value="">全ポジション</option></select>
+        <select id="fRank"><option value="">全評価</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <select id="fStatus"><option value="">全ステータス</option></select>
+        <select id="fSort">
+          <option value="recent">新しい動画順</option>
+          <option value="rank">評価順</option>
+          <option value="status">ステータス順</option>
+          <option value="name">名前順</option>
+        </select>
+      </div>
+    </div>
+    <div class="meta-line">
+      <span id="count"></span>
+      <span class="btnrow" id="cmpCtl">
+        <button class="btn" id="cmpBtn">比較</button>
+        <button class="btn hidden" id="cmpCancel">やめる</button>
+        <button class="btn primary hidden" id="cmpGo">比較する</button>
+      </span>
+      <span class="btnrow edit-only">
+        <button class="btn" id="settingsBtn">設定</button>
+        <button class="btn primary" id="addPlayerBtn">＋ 選手を追加</button>
+      </span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+</section>
+
+<!-- ===== 選手詳細 ===== -->
+<section id="detail" class="hidden">
+  <header class="dhead"><div class="topin">
+    <button class="btn ghost" id="backBtn">‹ 一覧</button>
+    <h1 id="dName"></h1>
+    <span class="btnrow edit-only"><button class="btn" id="editPlayerBtn">選手を編集</button></span>
+  </div></header>
+  <div class="dwrap">
+    <div>
+      <div class="player-frame" id="frame"><div class="ph">動画を選択してください</div></div>
+      <div class="now" id="now"></div>
+      <div class="scenes" id="scenes"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="panel">
+        <h2>動画 <button class="btn edit-only" id="addVideoBtn">＋ 動画</button></h2>
+        <div class="vlist" id="vlist"></div>
+      </div>
+      <div class="panel">
+        <h2>スカウト評価 <span class="st" id="dStatus"></span></h2>
+        <div id="grades"></div>
+        <div class="meas" id="meas"></div>
+      </div>
+      <div class="panel">
+        <h2>選手情報</h2>
+        <dl class="info" id="info"></dl>
+      </div>
+      <div class="panel">
+        <h2>評価メモ</h2>
+        <div class="memo" id="memo"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 保存バー ===== -->
+<div id="savebar" class="hidden"><div class="in">
+  <span>未保存の変更があります。書き出したファイルをGitHubにアップすると全員に反映されます。</span>
+  <button class="btn" id="exportBtn">保存ファイルを書き出す</button>
+</div></div>
+
+<div id="modalRoot"></div>
+
+<script>
+(() => {
+"use strict";
+const DATA_FILE = "data.enc.json";
+const DRAFT_KEY = "agk-scout-draft-v1";
+const ITER = 310000;
+const POSITIONS = ["投手","捕手","一塁手","二塁手","三塁手","遊撃手","外野手","内野手"];
+const STATUSES = ["視察予定","要再視察","獲得候補","最優先","見送り"];
+const GRADES = {
+  p: [["velo","球速"],["cmd","制球"],["brk","変化球"],["stuff","球のキレ"],["stam","スタミナ"]],
+  f: [["hit","ミート"],["pow","パワー"],["run","走力"],["def","守備"],["arm","肩"]],
+  c: [["fut","将来性"]]
+};
+const GRADE_LABEL = ["","1 物足りない","2 やや劣る","3 平均","4 良い","5 突出"];
+const MEAS = [
+  {k:"maxVelo", label:"最速",     unit:"km/h", g:"p", better:"high"},
+  {k:"avgVelo", label:"平均球速", unit:"km/h", g:"p", better:"high"},
+  {k:"quick",   label:"クイック", unit:"秒",   g:"p", better:"low"},
+  {k:"first",   label:"一塁到達", unit:"秒",   g:"f", better:"low"},
+  {k:"pop",     label:"二塁送球", unit:"秒",   g:"f", better:"low"},
+  {k:"m50",     label:"50m走",    unit:"秒",   g:"f", better:"low"},
+  {k:"throw",   label:"遠投",     unit:"m",    g:"f", better:"high"}
+];
+const grp = (p) => p.position === "投手" ? "p" : "f";
+const gradeDefs = (p) => [...GRADES[grp(p)], ...GRADES.c];
+const measDefs = (p) => MEAS.filter(m => m.g === grp(p));
+const measVal = (p, m) => { const v = p.meas && p.meas[m.k]; return v === "" || v == null ? null : +v; };
+let comparing = false; const sel = new Set();
+
+const $ = (id) => document.getElementById(id);
+const enc = new TextEncoder(), dec = new TextDecoder();
+const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+
+let vault = null;      // 暗号化ファイルの中身 {v,salt,iter,iv,ct}
+let key = null, salt = null;
+let data = null;       // {players:[...], updatedAt}
+let dirty = false;
+let current = null;    // 表示中の選手id
+let currentVideo = null;
+
+/* ---------- 暗号 ---------- */
+async function deriveKey(pw, saltBytes, iter = ITER) {
+  const base = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2", salt:saltBytes, iterations:iter, hash:"SHA-256"},
+    base, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
+}
+async function encryptData(obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(JSON.stringify(obj)));
+  return {v:1, salt:b64(salt), iter:ITER, iv:b64(iv), ct:b64(ct)};
+}
+async function decryptVault(v, k) {
+  const pt = await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(v.iv)}, k, unb64(v.ct));
+  return JSON.parse(dec.decode(pt));
+}
+
+/* ---------- 起動 ---------- */
+async function boot() {
+  try {
+    const r = await fetch(DATA_FILE + "?t=" + Date.now(), {cache:"no-store"});
+    if (r.ok) vault = await r.json();
+  } catch (e) { /* ファイルなし or ローカル */ }
+  showLockMode();
+}
+function showLockMode() {
+  if (vault) {
+    $("unlockForm").classList.remove("hidden"); $("setupForm").classList.add("hidden");
+    $("lockMsg").textContent = "スタッフ専用です。パスワードを入力してください。";
+    setTimeout(() => $("pw").focus(), 50);
+  } else {
+    $("unlockForm").classList.add("hidden"); $("setupForm").classList.remove("hidden");
+    $("lockMsg").textContent = "初回設定：データファイルがまだありません。スタッフ共通のパスワードを決めてください。";
+  }
+  if (!cryptoOK()) { $("lockMsg").textContent = CRYPTO_MSG; $("lockMsg").style.color = "var(--danger)"; }
+}
+
+$("unlockForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("unlockBtn"); btn.disabled = true; btn.textContent = "確認中…"; $("unlockErr").textContent = "";
+  try {
+    salt = unb64(vault.salt);
+    key = await deriveKey($("pw").value, salt, vault.iter || ITER);
+    data = await decryptVault(vault, key);
+    $("pw").value = "";
+    await maybeRestoreDraft();
+    enterApp();
+  } catch (err) {
+    key = null; $("unlockErr").textContent = cryptoOK() ? "パスワードが違います。" : CRYPTO_MSG;
+  } finally { btn.disabled = false; btn.textContent = "開く"; }
+});
+
+$("setupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const a = $("newpw1").value, b = $("newpw2").value;
+  const btn = e.target.querySelector("button"); $("setupErr").textContent = "";
+  if (a.length < 6) { $("setupErr").textContent = "6文字以上にしてください。"; return; }
+  if (a !== b) { $("setupErr").textContent = "2回入力したパスワードが一致しません。もう一度入力してください。"; return; }
+  if (!cryptoOK()) { $("setupErr").textContent = CRYPTO_MSG; return; }
+  btn.disabled = true; btn.textContent = "準備中…（数秒かかります）";
+  try {
+    salt = crypto.getRandomValues(new Uint8Array(16));
+    key = await deriveKey(a, salt);
+    data = {players:[], updatedAt:Date.now()};
+    $("newpw1").value = $("newpw2").value = "";
+    enterApp();
+    await markDirty();
+    toast("作成しました。選手と動画を追加したら「保存ファイルを書き出す」を押してください。", 5000);
+  } catch (err) {
+    $("setupErr").textContent = "開始できませんでした：" + (err && err.message || err);
+  } finally { btn.disabled = false; btn.textContent = "はじめる"; }
+});
+const CRYPTO_MSG = "このブラウザでは暗号化機能が使えません。GitHub Pagesの https:// のURLを、SafariかChromeで開いてください。";
+function cryptoOK() { return !!(window.crypto && crypto.subtle && window.isSecureContext !== false); }
+
+$("loadFileBtn").onclick = () => $("fileIn").click();
+$("fileIn").onchange = async () => {
+  const f = $("fileIn").files[0]; if (!f) return;
+  try { vault = JSON.parse(await f.text()); if (!vault.ct) throw 0; showLockMode(); }
+  catch { alert("このファイルは読み込めません。"); }
+};
+
+async function maybeRestoreDraft() {
+  let raw = null;
+  try { raw = localStorage.getItem(DRAFT_KEY); } catch {}
+  if (!raw) return;
+  try {
+    const d = await decryptVault(JSON.parse(raw), key);
+    if ((d.updatedAt || 0) > (data.updatedAt || 0) &&
+        confirm("この端末に書き出していない編集内容が残っています。復元しますか？")) {
+      data = d; dirty = true;
+    } else if ((d.updatedAt || 0) <= (data.updatedAt || 0)) {
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    }
+  } catch { /* パスワード変更前の下書きなど → 無視 */ }
+}
+
+function enterApp() {
+  $("lock").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("savebar").classList.toggle("hidden", !dirty);
+  fillPositionFilter();
+  renderList();
+}
+function lockNow() {
+  if (dirty && !confirm("書き出していない変更があります（この端末には下書きとして残ります）。ロックしますか？")) return;
+  key = null; data = null; current = null; dirty = false;
+  comparing = false; sel.clear(); updateCmpCtl(); $("modalRoot").innerHTML = "";
+  $("frame").innerHTML = '<div class="ph">動画を選択してください</div>';
+  ["app","detail","savebar"].forEach(id => $(id).classList.add("hidden"));
+  $("lock").classList.remove("hidden");
+  $("editToggle").checked = false; document.body.classList.remove("editing");
+  showLockMode();
+}
+$("lockBtn").onclick = lockNow;
+
+/* ---------- 変更・保存 ---------- */
+async function markDirty() {
+  data.updatedAt = Date.now();
+  dirty = true;
+  $("savebar").classList.remove("hidden");
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(await encryptData(data))); } catch {}
+}
+$("exportBtn").onclick = async () => {
+  const v = await encryptData(data);
+  const blob = new Blob([JSON.stringify(v)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = DATA_FILE;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  vault = v; dirty = false;
+  $("savebar").classList.add("hidden");
+  try { localStorage.removeItem(DRAFT_KEY); } catch {}
+  toast("data.enc.json を書き出しました。GitHubのファイルを差し替えてください。", 5000);
+};
+window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+$("editToggle").onchange = () => document.body.classList.toggle("editing", $("editToggle").checked);
+
+/* ---------- YouTube ---------- */
+function ytId(url) {
+  if (!url) return null;
+  const s = String(url).trim();
+  if (/^[\w-]{11}$/.test(s)) return s;
+  const m = s.match(/(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function ytStart(url) {
+  const m = String(url || "").match(/[?&]t=([\dhms]+)/);
+  return m ? parseTime(m[1]) : 0;
+}
+function parseTime(s) {
+  s = String(s).trim();
+  if (/^\d+$/.test(s)) return +s;
+  if (/^[\dhms]+$/.test(s) && /[hms]/.test(s)) {
+    let t = 0; s.replace(/(\d+)([hms])/g, (_, n, u) => { t += n * {h:3600, m:60, s:1}[u]; }); return t;
+  }
+  const p = s.split(":").map(Number);
+  if (p.some(isNaN)) return null;
+  return p.reduce((a, n) => a * 60 + n, 0);
+}
+function fmtTime(t) {
+  const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
+function parseScenes(text) {
+  return String(text || "").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/^(\S+)\s*(.*)$/); const t = parseTime(m[1]);
+    return t == null ? null : {t, label:m[2] || ""};
+  }).filter(Boolean).sort((a, b) => a.t - b.t);
+}
+function playVideo(v, start) {
+  const id = ytId(v.url);
+  if (!id) { $("frame").innerHTML = '<div class="ph">URLからYouTube動画を認識できません</div>'; return; }
+  const st = start ?? ytStart(v.url);
+  $("frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1${st ? "&start=" + st : ""}${start != null ? "&autoplay=1" : ""}"
+    allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" title="動画"></iframe>`;
+}
+
+/* ---------- 一覧 ---------- */
+const latestDate = (p) => (p.videos || []).reduce((m, v) => v.date > m ? v.date : m, "");
+function fillPositionFilter() {
+  const sel = $("fPos"), cur = sel.value;
+  const set = new Set([...POSITIONS, ...data.players.map(p => p.position).filter(Boolean)]);
+  sel.innerHTML = '<option value="">全ポジション</option>' + [...set].map(p => `<option>${esc(p)}</option>`).join("");
+  sel.value = cur;
+  const fs = $("fStatus"); if (fs.options.length < 2)
+    fs.innerHTML = '<option value="">全ステータス</option>' + STATUSES.map(s => `<option>${s}</option>`).join("");
+}
+function renderList() {
+  const q = $("q").value.trim().toLowerCase(), pos = $("fPos").value, rk = $("fRank").value, sort = $("fSort").value, fst = $("fStatus").value;
+  document.body.classList.toggle("comparing", comparing);
+  let list = data.players.filter(p => {
+    if (pos && p.position !== pos) return false;
+    if (rk && p.rank !== rk) return false;
+    if (fst && p.status !== fst) return false;
+    if (!q) return true;
+    const hay = [p.name, p.kana, p.team, p.position, p.memo, p.scout, ...(p.videos || []).map(v => v.title + " " + (v.event || ""))].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+  const rv = {A:0, B:1, C:2, D:3};
+  list.sort(sort === "name" ? (a, b) => (a.kana || a.name).localeCompare(b.kana || b.name, "ja")
+          : sort === "status" ? (a, b) => {
+              const so = {"最優先":0,"獲得候補":1,"要再視察":2,"視察予定":3,"見送り":5};
+              return (so[a.status] ?? 4) - (so[b.status] ?? 4) || (rv[a.rank] ?? 9) - (rv[b.rank] ?? 9); }
+          : sort === "rank" ? (a, b) => (rv[a.rank] ?? 9) - (rv[b.rank] ?? 9) || latestDate(b).localeCompare(latestDate(a))
+          : (a, b) => latestDate(b).localeCompare(latestDate(a)) || (b.updatedAt || 0) - (a.updatedAt || 0));
+  $("count").textContent = `${list.length}人 / 全${data.players.length}人`;
+  if (!data.players.length) {
+    $("grid").innerHTML = `<div class="empty" style="grid-column:1/-1">まだ選手が登録されていません。<br>右上の「編集」をオンにして「＋ 選手を追加」から登録できます。</div>`;
+    return;
+  }
+  if (!list.length) { $("grid").innerHTML = `<div class="empty" style="grid-column:1/-1">条件に合う選手がいません。</div>`; return; }
+  $("grid").innerHTML = list.map(p => {
+    const n = (p.videos || []).length, ld = latestDate(p);
+    const m1 = measDefs(p).find(m => measVal(p, m) != null);
+    return `<button class="card${sel.has(p.id) ? " sel" : ""}" data-id="${p.id}">
+      <span class="rank ${p.rank || "none"}">${esc(p.rank || "–")}</span>
+      <span class="body">
+        <div class="name">${esc(p.name)}</div>
+        <div class="sub">${esc([p.team, p.position, p.batsThrows].filter(Boolean).join(" ・ ") || "—")}</div>
+        <div class="foot">${p.status ? `<span class="chip st st-${esc(p.status)}">${esc(p.status)}</span>` : ""}${m1 ? `<span class="chip">${m1.label} ${measVal(p, m1)}${m1.unit}</span>` : ""}<span class="chip">動画 ${n}本</span>${ld ? `<span class="chip">最新 ${esc(ld)}</span>` : ""}${p.scout ? `<span class="chip">担当 ${esc(p.scout)}</span>` : ""}</div>
+      </span></button>`;
+  }).join("");
+}
+["q","fPos","fRank","fSort","fStatus"].forEach(id => $(id).addEventListener("input", renderList));
+$("grid").addEventListener("click", (e) => {
+  const c = e.target.closest(".card"); if (!c) return;
+  if (!comparing) return openPlayer(c.dataset.id);
+  const id = c.dataset.id;
+  if (sel.has(id)) sel.delete(id); else if (sel.size >= 4) return toast("比較できるのは4人までです"); else sel.add(id);
+  updateCmpCtl(); renderList();
+});
+
+/* ---------- 比較 ---------- */
+function updateCmpCtl() {
+  $("cmpBtn").classList.toggle("hidden", comparing);
+  $("cmpCancel").classList.toggle("hidden", !comparing);
+  $("cmpGo").classList.toggle("hidden", !comparing);
+  $("cmpGo").disabled = sel.size < 2;
+  $("cmpGo").textContent = `比較する（${sel.size}人）`;
+}
+$("cmpBtn").onclick = () => { comparing = true; sel.clear(); updateCmpCtl(); renderList(); toast("比較したい選手を2〜4人タップしてください"); };
+$("cmpCancel").onclick = () => { comparing = false; sel.clear(); updateCmpCtl(); renderList(); };
+$("cmpGo").onclick = () => {
+  const ps = [...sel].map(getP).filter(Boolean);
+  const latest = (p) => [...(p.videos || [])].sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0];
+  const rows = [];
+  const row = (label, fn, cls) => rows.push(`<tr><th>${label}</th>${ps.map((p, i) => `<td class="${cls ? cls(p, i) : ""}">${fn(p)}</td>`).join("")}</tr>`);
+  row("", p => { const v = latest(p), id = v && ytId(v.url);
+    return `<button class="btn ghost" style="padding:0;display:block;text-align:left" data-open="${p.id}">${id ? `<img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="">` : ""}<b style="font-size:15px">${esc(p.name)}</b></button>`; });
+  [["所属","team"],["ポジション","position"],["投打","batsThrows"],["学年・年齢","grade"],["身長・体重","body"],["総合評価","rank"],["ステータス","status"],["担当","scout"]]
+    .forEach(([l, k]) => { if (ps.some(p => p[k])) row(l, p => esc(p[k] || "—")); });
+  const gkeys = []; ps.forEach(p => gradeDefs(p).forEach(g => { if (!gkeys.some(x => x[0] === g[0])) gkeys.push(g); }));
+  gkeys.forEach(([k, l]) => {
+    if (!ps.some(p => p.grades && p.grades[k])) return;
+    const vals = ps.map(p => +(p.grades && p.grades[k]) || 0), mx = Math.max(...vals);
+    row(l, p => (p.grades && p.grades[k]) ? "●".repeat(p.grades[k]) + `<span style="color:var(--line)">${"●".repeat(5 - p.grades[k])}</span>` : "—",
+      (p, i) => vals[i] && vals[i] === mx && vals.filter(v => v === mx).length < ps.length ? "best" : "");
+  });
+  MEAS.forEach(m => {
+    const vals = ps.map(p => measVal(p, m)); const ok = vals.filter(v => v != null); if (!ok.length) return;
+    const best = m.better === "high" ? Math.max(...ok) : Math.min(...ok);
+    row(`${m.label}（${m.unit}）`, p => measVal(p, m) ?? "—", (p, i) => vals[i] === best && ok.length > 1 ? "best" : "");
+  });
+  row("動画", p => `${(p.videos || []).length}本`);
+  row("評価メモ", p => `<div style="white-space:pre-wrap;min-width:180px;max-width:260px">${esc(p.memo || "—")}</div>`);
+  modal(`<h3>選手比較</h3><div class="cmpwrap"><table class="cmp">${rows.join("")}</table></div>
+    <div class="hint" style="margin-top:8px">青字＝その項目でいちばん良い値。名前を押すと選手ページを開きます。</div>
+    <div class="btnrow" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn" data-close>閉じる</button></div>`,
+    () => {}, (f, close) => {
+      f.classList.add("wide");
+      f.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { close(); openPlayer(b.dataset.open); });
+    });
+};
+
+/* ---------- 使い方 ---------- */
+$("guideBtn").onclick = () => modal(`<h3>使い方・チェックリスト</h3><div class="guide">
+  <h4>YouTubeにアップするとき</h4>
+  <ol>
+    <li>公開設定は<b>「限定公開」</b>にする（「公開」にしない）</li>
+    <li>「子ども向けではありません」を選ぶ（子ども向けにすると埋め込み再生が制限されます）</li>
+    <li>詳細設定の<b>「埋め込みを許可」をオン</b>のままにする（オフだとアプリで再生できません）</li>
+    <li>コメントは「オフ」にする</li>
+    <li>YouTubeのタイトルに選手名・学校名は入れない（例：「20261106_01」）。URLが漏れても誰の動画か分からないようにするためです</li>
+    <li>アップしたら「共有」でURLをコピーし、このアプリの「＋ 動画」に貼り付ける</li>
+  </ol>
+  <h4>撮影チェックリスト</h4>
+  <ul>
+    <li>打者：全打席（構え〜フォロースルーまで切らない）。バックネット裏か一塁/三塁側の高い位置から</li>
+    <li>投手：センター方向かバックネット裏から、リリースが見える位置で。可能なら球速表示も映す</li>
+    <li>守備機会・走塁も撮れたら残す（一塁到達・二塁送球はストップウォッチで計測）</li>
+    <li>試合前ノック・ブルペンは評価材料として価値が高いので積極的に</li>
+    <li>撮影後すぐ「シーン」に打席ごとの時間をメモしておくと後で見返しやすい</li>
+  </ul>
+  <h4>評価の目安（5段階）</h4>
+  <ul>
+    <li>5 突出 ／ 4 良い ／ 3 社会人で平均的 ／ 2 やや劣る ／ 1 物足りない</li>
+    <li>総合評価 A〜D とステータス（視察予定 → 要再視察 → 獲得候補 → 最優先 ／ 見送り）で進み具合を管理</li>
+  </ul>
+  <h4>データの保存</h4>
+  <ul>
+    <li>編集後は画面下の「保存ファイルを書き出す」→ GitHubの data.enc.json を差し替えると全員に反映されます</li>
+  </ul></div>
+  <div class="btnrow" style="justify-content:flex-end;margin-top:14px"><button type="button" class="btn" data-close>閉じる</button></div>`, () => {});
+
+/* ---------- 詳細 ---------- */
+const getP = (id) => data.players.find(p => p.id === id);
+function openPlayer(id, keepVideo) {
+  current = id; const p = getP(id); if (!p) return closeDetail();
+  $("detail").classList.remove("hidden"); document.body.style.overflow = "hidden";
+  $("dName").textContent = p.name;
+  const vids = [...(p.videos || [])].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("vlist").innerHTML = vids.length ? vids.map(v => {
+    const id2 = ytId(v.url);
+    return `<div style="display:flex;gap:6px;align-items:stretch">
+      <button class="vitem${currentVideo === v.id ? " on" : ""}" data-v="${v.id}">
+        ${id2 ? `<img loading="lazy" src="https://i.ytimg.com/vi/${id2}/mqdefault.jpg" alt="">` : ""}
+        <span class="grow"><div class="vt">${esc(v.title || "（無題）")}</div>
+        <div class="vs">${esc([v.date, v.event].filter(Boolean).join(" ・ "))}${(v.scenes || []).length ? ` ・ シーン${v.scenes.length}` : ""}</div></span>
+      </button>
+      <button class="btn edit-only" data-ev="${v.id}" title="編集">編集</button></div>`;
+  }).join("") : `<div class="hint">動画がまだありません。</div>`;
+  const rows = [["所属", p.team], ["ポジション", p.position], ["投打", p.batsThrows], ["学年・年齢", p.grade],
+    ["身長・体重", p.body], ["評価", p.rank], ["担当スカウト", p.scout], ["ふりがな", p.kana]].filter(r => r[1]);
+  $("info").innerHTML = rows.map(r => `<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join("") || `<dd class="hint">未入力</dd>`;
+  $("memo").textContent = p.memo || "—";
+  $("dStatus").className = "st st-" + (p.status || ""); $("dStatus").textContent = p.status || "";
+  const gd = gradeDefs(p).filter(([k]) => p.grades && p.grades[k]);
+  $("grades").innerHTML = gd.length ? `<div class="grades">${gd.map(([k, l]) =>
+    `<span>${l}</span><span class="gbar"><i style="width:${p.grades[k] * 20}%"></i></span><span class="gnum">${p.grades[k]}</span>`).join("")}</div>`
+    : `<div class="hint">未評価</div>`;
+  const md = measDefs(p).filter(m => measVal(p, m) != null);
+  $("meas").innerHTML = md.map(m => `<div><small>${m.label}</small><b>${measVal(p, m)}</b> ${m.unit}</div>`).join("");
+  if (!keepVideo) {
+    currentVideo = null;
+    $("frame").innerHTML = '<div class="ph">動画を選択してください</div>'; $("now").innerHTML = ""; $("scenes").innerHTML = "";
+    if (vids[0]) selectVideo(vids[0].id, false);
+  }
+}
+function selectVideo(vid, autoplay = true) {
+  const p = getP(current); const v = (p.videos || []).find(x => x.id === vid); if (!v) return;
+  currentVideo = vid;
+  document.querySelectorAll(".vitem").forEach(el => el.classList.toggle("on", el.dataset.v === vid));
+  playVideo(v, autoplay ? ytStart(v.url) : null);
+  $("now").innerHTML = `<div class="t">${esc(v.title || "（無題）")}</div><div class="s">${esc([v.date, v.event].filter(Boolean).join(" ・ "))}</div>${v.note ? `<div class="s" style="white-space:pre-wrap;margin-top:4px">${esc(v.note)}</div>` : ""}`;
+  $("scenes").innerHTML = (v.scenes || []).map(s => `<button class="scene" data-t="${s.t}"><b>${fmtTime(s.t)}</b>${esc(s.label)}</button>`).join("");
+}
+$("vlist").addEventListener("click", (e) => {
+  const ev = e.target.closest("[data-ev]"); if (ev) return videoForm(ev.dataset.ev);
+  const it = e.target.closest(".vitem"); if (it) { selectVideo(it.dataset.v); if (innerWidth < 900) scrollTo({top:0}); $("detail").scrollTo({top:0, behavior:"smooth"}); }
+});
+$("scenes").addEventListener("click", (e) => {
+  const b = e.target.closest(".scene"); if (!b) return;
+  const v = getP(current).videos.find(x => x.id === currentVideo); playVideo(v, +b.dataset.t);
+  $("detail").scrollTo({top:0, behavior:"smooth"});
+});
+function closeDetail() {
+  $("detail").classList.add("hidden"); document.body.style.overflow = "";
+  $("frame").innerHTML = '<div class="ph">動画を選択してください</div>'; current = null; currentVideo = null;
+  renderList();
+}
+$("backBtn").onclick = closeDetail;
+$("editPlayerBtn").onclick = () => playerForm(current);
+$("addVideoBtn").onclick = () => videoForm(null);
+$("addPlayerBtn").onclick = () => playerForm(null);
+$("settingsBtn").onclick = settingsForm;
+
+/* ---------- フォーム ---------- */
+function modal(html, onSubmit, onMount) {
+  const root = $("modalRoot");
+  root.innerHTML = `<div class="modal"><form class="sheet" autocomplete="off">${html}</form></div>`;
+  const form = root.querySelector("form");
+  const close = () => root.innerHTML = "";
+  root.querySelector(".modal").addEventListener("click", (e) => { if (e.target.classList.contains("modal")) close(); });
+  form.addEventListener("submit", async (e) => { e.preventDefault(); if ((await onSubmit(form)) !== false) close(); });
+  form.querySelectorAll("[data-close]").forEach(b => b.onclick = close);
+  onMount && onMount(form, close);
+  const first = form.querySelector("input,textarea,select"); first && first.focus();
+}
+const val = (f, n) => (f.elements[n].value || "").trim();
+
+function playerForm(id) {
+  const p = id ? getP(id) : {};
+  const posOpts = POSITIONS.map(x => `<option ${p.position === x ? "selected" : ""}>${x}</option>`).join("");
+  const gv = (k) => (p.grades && p.grades[k]) || "";
+  const gradeSel = ([k, l]) => `<label>${l}<select name="g_${k}"><option value="">—</option>${[5,4,3,2,1].map(n =>
+    `<option value="${n}" ${+gv(k) === n ? "selected" : ""}>${GRADE_LABEL[n]}</option>`).join("")}</select></label>`;
+  modal(`
+    <h3>${id ? "選手を編集" : "選手を追加"}</h3>
+    <div class="two">
+      <label class="field"><span>選手名 *</span><input type="text" name="name" required value="${esc(p.name)}"></label>
+      <label class="field"><span>ふりがな</span><input type="text" name="kana" value="${esc(p.kana)}"></label>
+    </div>
+    <label class="field"><span>所属（学校・チーム）</span><input type="text" name="team" value="${esc(p.team)}"></label>
+    <div class="two">
+      <label class="field"><span>ポジション</span><select name="position"><option value="">—</option>${posOpts}</select></label>
+      <label class="field"><span>投打</span><input type="text" name="batsThrows" placeholder="右投左打" value="${esc(p.batsThrows)}"></label>
+    </div>
+    <div class="two">
+      <label class="field"><span>学年・年齢</span><input type="text" name="grade" placeholder="大学4年" value="${esc(p.grade)}"></label>
+      <label class="field"><span>身長・体重</span><input type="text" name="body" placeholder="180cm 80kg" value="${esc(p.body)}"></label>
+    </div>
+    <div class="two">
+      <label class="field"><span>評価</span><select name="rank"><option value="">—</option>${["A","B","C","D"].map(r => `<option ${p.rank === r ? "selected" : ""}>${r}</option>`).join("")}</select></label>
+      <label class="field"><span>担当スカウト</span><input type="text" name="scout" value="${esc(p.scout)}"></label>
+    </div>
+    <label class="field"><span>ステータス</span><select name="status"><option value="">—</option>${STATUSES.map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+    <fieldset><legend>5段階評価（3＝社会人で平均的）</legend>
+      ${["p","f"].map(g => `<div class="gsel" data-g="${g}">${GRADES[g].map(gradeSel).join("")}</div>`).join("")}
+      <div class="gsel" style="margin-top:8px;margin-bottom:8px">${GRADES.c.map(gradeSel).join("")}</div>
+    </fieldset>
+    <fieldset><legend>計測値</legend>
+      ${["p","f"].map(g => `<div class="two" data-g="${g}">${MEAS.filter(m => m.g === g).map(m =>
+        `<label class="field"><span>${m.label}（${m.unit}）</span><input type="text" inputmode="decimal" name="m_${m.k}" value="${esc(p.meas && p.meas[m.k])}"></label>`).join("")}</div>`).join("")}
+    </fieldset>
+    <label class="field"><span>評価メモ</span><textarea name="memo" rows="5">${esc(p.memo)}</textarea></label>
+    <div class="btnrow" style="justify-content:space-between;margin-top:6px">
+      ${id ? `<button type="button" class="btn danger" id="delP">削除</button>` : "<span></span>"}
+      <span class="btnrow"><button type="button" class="btn" data-close>キャンセル</button><button class="btn primary">保存</button></span>
+    </div>`,
+  (f) => {
+    const o = {name:val(f,"name"), kana:val(f,"kana"), team:val(f,"team"), position:val(f,"position"), batsThrows:val(f,"batsThrows"),
+      grade:val(f,"grade"), body:val(f,"body"), rank:val(f,"rank"), scout:val(f,"scout"), memo:f.elements.memo.value.trim(), updatedAt:Date.now(),
+      status:val(f,"status"), grades:{}, meas:{}};
+    [...GRADES.p, ...GRADES.f, ...GRADES.c].forEach(([k]) => { const n = +val(f, "g_" + k); if (n) o.grades[k] = n; });
+    for (const m of MEAS) {
+      const raw = val(f, "m_" + m.k).replace(/[０-９．]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[^\d.]/g, "");
+      if (raw && !isNaN(+raw)) o.meas[m.k] = +raw;
+    }
+    if (id) Object.assign(getP(id), o); else { o.id = uid(); o.videos = []; data.players.push(o); }
+    markDirty(); fillPositionFilter();
+    if (id) openPlayer(id, true); else { renderList(); openPlayer(o.id); }
+  },
+  (f, close) => {
+    const pos = f.elements.position;
+    const sync = () => { const g = pos.value === "投手" ? "p" : "f";
+      f.querySelectorAll("[data-g]").forEach(el => el.classList.toggle("hidden", el.dataset.g !== g)); };
+    pos.addEventListener("change", sync); sync();
+    const d = f.querySelector("#delP"); if (d) d.onclick = () => {
+    if (!confirm(`「${p.name}」と動画${(p.videos||[]).length}本の登録を削除しますか？（YouTube上の動画は消えません）`)) return;
+    data.players = data.players.filter(x => x.id !== id); markDirty(); close(); closeDetail(); }; });
+}
+
+function videoForm(vid) {
+  const p = getP(current); const v = vid ? p.videos.find(x => x.id === vid) : {date:new Date(Date.now() + 9*3600e3).toISOString().slice(0,10)};
+  const sceneTxt = (v.scenes || []).map(s => `${fmtTime(s.t)} ${s.label}`).join("\n");
+  modal(`
+    <h3>${vid ? "動画を編集" : "動画を追加"} <span class="hint">— ${esc(p.name)}</span></h3>
+    <label class="field"><span>YouTube URL（限定公開） *</span><input type="url" name="url" required placeholder="https://youtu.be/..." value="${esc(v.url)}">
+      <div class="hint" id="urlHint"></div></label>
+    <label class="field"><span>タイトル</span><input type="text" name="title" placeholder="第1打席〜第4打席 / 先発5回" value="${esc(v.title)}"></label>
+    <div class="two">
+      <label class="field"><span>撮影日</span><input type="date" name="date" value="${esc(v.date)}"></label>
+      <label class="field"><span>大会・試合</span><input type="text" name="event" placeholder="秋季リーグ vs ○○大" value="${esc(v.event)}"></label>
+    </div>
+    <label class="field"><span>シーン（1行に「時間 内容」）</span>
+      <textarea name="scenes" rows="5" placeholder="0:45 第1打席 右中間二塁打&#10;12:30 第2打席 空振り三振&#10;1:05:10 守備 6-4-3">${esc(sceneTxt)}</textarea>
+      <div class="hint">タップするとその時間から再生されます。</div></label>
+    <label class="field"><span>この動画のメモ</span><textarea name="note" rows="3">${esc(v.note)}</textarea></label>
+    <div class="btnrow" style="justify-content:space-between;margin-top:6px">
+      ${vid ? `<button type="button" class="btn danger" id="delV">削除</button>` : "<span></span>"}
+      <span class="btnrow"><button type="button" class="btn" data-close>キャンセル</button><button class="btn primary">保存</button></span>
+    </div>`,
+  (f) => {
+    if (!ytId(val(f,"url"))) { alert("YouTubeのURLを認識できません。"); return false; }
+    const o = {url:val(f,"url"), title:val(f,"title"), date:val(f,"date"), event:val(f,"event"), scenes:parseScenes(f.elements.scenes.value), note:f.elements.note.value.trim()};
+    let id2 = vid;
+    if (vid) Object.assign(v, o); else { o.id = id2 = uid(); (p.videos ||= []).push(o); }
+    p.updatedAt = Date.now(); markDirty();
+    openPlayer(current, true); selectVideo(id2, false);
+  },
+  (f, close) => {
+    const u = f.elements.url, h = f.querySelector("#urlHint");
+    const chk = () => { h.textContent = u.value ? (ytId(u.value) ? "✓ YouTube動画を認識しました" : "YouTubeのURLを貼り付けてください") : ""; };
+    u.addEventListener("input", chk); chk();
+    const d = f.querySelector("#delV"); if (d) d.onclick = () => {
+      if (!confirm("この動画の登録を削除しますか？（YouTube上の動画は消えません）")) return;
+      p.videos = p.videos.filter(x => x.id !== vid); markDirty(); close(); openPlayer(current);
+    };
+  });
+}
+
+function settingsForm() {
+  modal(`
+    <h3>設定</h3>
+    <div class="panel" style="margin-bottom:12px">
+      <h2>パスワード変更</h2>
+      <label class="field"><span>新しいパスワード</span><input type="password" name="p1" autocomplete="new-password" minlength="6"></label>
+      <label class="field"><span>もう一度</span><input type="password" name="p2" autocomplete="new-password"></label>
+      <div class="hint">変更後に保存ファイルを書き出してGitHubに上げると、古いパスワードでは開けなくなります。スタッフ全員に新しいパスワードを伝えてください。</div>
+    </div>
+    <div class="panel" style="margin-bottom:12px">
+      <h2>バックアップ</h2>
+      <div class="btnrow"><button type="button" class="btn" id="dlRaw">暗号化なしで書き出す（手元保管用）</button></div>
+      <div class="hint">※このファイルは誰でも読めます。GitHubには絶対に上げないでください。</div>
+    </div>
+    <div class="btnrow" style="justify-content:flex-end"><button type="button" class="btn" data-close>閉じる</button><button class="btn primary">パスワードを変更</button></div>`,
+  async (f) => {
+    const a = f.elements.p1.value, b = f.elements.p2.value;
+    if (!a) return;
+    if (a.length < 6) { alert("6文字以上にしてください。"); return false; }
+    if (a !== b) { alert("パスワードが一致しません。"); return false; }
+    salt = crypto.getRandomValues(new Uint8Array(16)); key = await deriveKey(a, salt);
+    await markDirty(); toast("パスワードを変更しました。保存ファイルを書き出してください。", 4000);
+  },
+  (f) => { f.querySelector("#dlRaw").onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type:"application/json"}));
+    a.download = "scout-backup-" + new Date().toISOString().slice(0,10) + ".json"; a.click();
+  }; });
+}
+
+function toast(msg, ms = 2500) {
+  document.querySelectorAll(".toast").forEach(x => x.remove());
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("modalRoot").innerHTML = ""; });
+
+boot();
+})();
+</script>
+</body>
+</html>
